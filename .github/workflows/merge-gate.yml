@@ -1,0 +1,110 @@
+# merge-gate: hands-off merging for pull requests into main.
+#
+# What it does, in order:
+#   1. Holds any pull request that changes .github/ (workflows, CODEOWNERS,
+#      automation) for a human owner. Those never merge automatically.
+#   2. Turns on auto-merge (squash) for pull requests from branches inside
+#      this repository. Pull requests from forks are never auto-merged.
+#   3. Waits until every other check on the pull request has finished and
+#      fails if any of them failed.
+#
+# The organization ruleset on main requires this "merge-gate" check, so a
+# pull request merges only when this job passes.
+#
+# Security note: this runs on pull_request_target, so GitHub always uses
+# the copy of this file on main, never a copy edited inside a pull request.
+# It never checks out or runs pull request code.
+
+name: merge-gate
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: merge-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    # Public repositories only; on private repositories this needs a paid
+    # GitHub Advanced Security licence.
+    if: github.event.repository.visibility == 'public'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  merge-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: read
+      statuses: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+      IS_DRAFT: ${{ github.event.pull_request.draft }}
+    steps:
+      - name: Hold changes to automation and ownership files
+        run: |
+          set -euo pipefail
+          files=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename')
+          sensitive=$(printf '%s\n' "$files" | grep -E '^\.github/|(^|/)CODEOWNERS$' || true)
+          if [ -n "$sensitive" ]; then
+            echo "::error::This pull request changes protected files and needs the owner to merge it:"
+            printf '%s\n' "$sensitive"
+            exit 1
+          fi
+
+      - name: Turn on auto-merge
+        if: env.SAME_REPO == 'true' && env.IS_DRAFT != 'true'
+        run: gh pr merge --auto --squash "$PR_URL" || echo "::warning::Could not turn on auto-merge."
+
+      - name: Wait for every other check to pass
+        run: |
+          set -euo pipefail
+          sleep 60
+          stable=0
+          for i in $(seq 1 140); do
+            runs=$(gh api "repos/$REPO/commits/$HEAD_SHA/check-runs?per_page=100" --paginate \
+              --jq '.check_runs[] | select(.name != "merge-gate") | [.name, .status, (.conclusion // "")] | @tsv')
+            statuses=$(gh api "repos/$REPO/commits/$HEAD_SHA/status" \
+              --jq '.statuses[] | [.context, .state] | @tsv')
+
+            failed=$( { printf '%s\n' "$runs" | awk -F'\t' '$3 ~ /^(failure|cancelled|timed_out|action_required|stale)$/ {print $1" ("$3")"}';
+                        printf '%s\n' "$statuses" | awk -F'\t' '$2 ~ /^(failure|error)$/ {print $1" ("$2")"}'; } )
+            pending=$( { printf '%s\n' "$runs" | awk -F'\t' 'NF && $2 != "completed" {print $1}';
+                         printf '%s\n' "$statuses" | awk -F'\t' '$2 == "pending" {print $1}'; } )
+
+            if [ -n "$failed" ]; then
+              echo "::error::These checks failed:"
+              printf '%s\n' "$failed"
+              exit 1
+            fi
+            if [ -z "$pending" ]; then
+              stable=$((stable + 1))
+              if [ "$stable" -ge 2 ]; then
+                echo "All checks passed."
+                exit 0
+              fi
+            else
+              stable=0
+              echo "Waiting on: $(printf '%s ' $pending)"
+            fi
+            sleep 20
+          done
+          echo "::error::Timed out waiting for checks."
+          exit 1
