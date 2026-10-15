@@ -1,0 +1,98 @@
+# slice-assignment-check: closes pull requests from outside contributors that
+# claim an open-call slice without a maintainer assignment.
+#
+# What it does:
+# 1. Runs only for pull requests from forks, by people who are not owners,
+#    members or collaborators of this repository.
+# 2. Looks in the title and description for a reference to a slice issue
+#    (#3, #16-#20), written as #N, org#N, org/repo#N or an issue URL.
+# 3. If the author is assigned to at least one referenced slice, it does nothing.
+# 4. Otherwise it posts one polite comment, adds the "unassigned" label and
+#    closes the pull request. Maintainers can reopen it by hand.
+#
+# Security note: this runs on pull_request_target, so GitHub always uses the
+# copy of this file on main. It never checks out or runs pull request code,
+# and it only reads the title, description, author and issue assignees.
+#
+# Maintenance: when a new slice issue opens, add its number to SLICES.
+
+name: slice-assignment-check
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited]
+
+permissions: {}
+
+jobs:
+  check:
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const SLICES = [3, 16, 17, 18, 19, 20];
+            const INDEX = 21;
+            const MARKER = '<!-- slice-assignment-check -->';
+            const pr = context.payload.pull_request;
+
+            if (pr.state !== 'open') return;
+            if (['OWNER', 'MEMBER', 'COLLABORATOR'].includes(pr.author_association)) return;
+
+            const text = `${pr.title}\n${pr.body || ''}`;
+            const refs = new Set();
+            const patterns = [
+              /(?:^|[^\w\/])#(\d+)\b/g,
+              /Element-Ventures-Canada-Ltd(?:\/openchokepoint)?#(\d+)\b/gi,
+              /github\.com\/Element-Ventures-Canada-Ltd\/openchokepoint\/issues\/(\d+)/gi,
+            ];
+            for (const re of patterns) {
+              for (const m of text.matchAll(re)) refs.add(Number(m[1]));
+            }
+            const claimed = [...refs].filter((n) => SLICES.includes(n));
+            if (claimed.length === 0) return;
+
+            const author = pr.user.login.toLowerCase();
+            for (const n of claimed) {
+              const { data: issue } = await github.rest.issues.get({ ...context.repo, issue_number: n });
+              if ((issue.assignees || []).some((a) => a.login.toLowerCase() === author)) {
+                core.info(`Author is assigned to #${n}; nothing to do.`);
+                return;
+              }
+            }
+
+            // One comment per pull request, even if it is reopened or edited.
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...context.repo, issue_number: pr.number, per_page: 100,
+            });
+            if (!comments.some((c) => (c.body || '').includes(MARKER))) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: [
+                  MARKER,
+                  'Handling: Unclassified — public',
+                  '',
+                  `Thanks for your interest. This work needs a maintainer assignment before a pull request (see "How to take part" in #${INDEX}). We've closed this PR for now.`,
+                  '',
+                  'Please comment on the relevant slice issue with your Responsible Person and, for source-based work, your source table, and we will take it from there.',
+                ].join('\n'),
+              });
+            }
+
+            try {
+              await github.rest.issues.getLabel({ ...context.repo, name: 'unassigned' });
+            } catch (e) {
+              await github.rest.issues.createLabel({
+                ...context.repo, name: 'unassigned', color: 'bfbfbf',
+                description: 'Pull request for an open-call slice without a maintainer assignment',
+              });
+            }
+            await github.rest.issues.addLabels({ ...context.repo, issue_number: pr.number, labels: ['unassigned'] });
+            await github.rest.pulls.update({ ...context.repo, pull_number: pr.number, state: 'closed' });
+            core.notice(`Closed: references ${claimed.map((n) => '#' + n).join(', ')} without an assignment.`);
