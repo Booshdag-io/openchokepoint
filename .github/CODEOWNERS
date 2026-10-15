@@ -1,0 +1,40 @@
+# CODEOWNERS - OpenChokepoint (public repository)
+# HANDLING: Unclassified - public
+# The merge gate reads this file from main. Any pull request that changes a
+# path below is held until the owner merges it by hand. Everything else
+# (schema/, examples/, docs/, sdk/, apps/, tests/) follows the normal pull
+# request + automated checks path.
+
+# Automation and ownership
+/.github/ @TLS-sys
+/.gitignore @TLS-sys
+
+# Boundary enforcement: the validator is the export-control and handling guard,
+# and data/ is where real (synthetic: false) records live.
+/tools/validate.py @TLS-sys
+/data/ @TLS-sys
+
+# Handling, export control and contribution scope
+/HANDLING.md @TLS-sys
+/EXPORT-CONTROL.md @TLS-sys
+/DATA-CONTRIBUTIONS.md @TLS-sys
+/CONTRIBUTION-SCOPE.md @TLS-sys
+/SECURITY.md @TLS-sys
+
+# Legal, licensing and contributor terms
+/LICENSE @TLS-sys
+/LICENSING.md @TLS-sys
+/NOTICE @TLS-sys
+/CLA.md @TLS-sys
+/CCLA.md @TLS-sys
+/BOUNTIES.md @TLS-sys
+/LEDGER.md @TLS-sys
+/FEEDBACK.md @TLS-sys
+
+# Governance and public positioning
+/GOVERNANCE.md @TLS-sys
+/MAINTAINERS.md @TLS-sys
+/CODE_OF_CONDUCT.md @TLS-sys
+/CONTRIBUTING.md @TLS-sys
+/PROGRAM.md @TLS-sys
+/README.md @TLS-sys
