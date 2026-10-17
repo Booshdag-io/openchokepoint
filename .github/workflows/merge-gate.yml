@@ -7,6 +7,11 @@
 #      from the pull request), or anything under .github/.
 #    Those never merge automatically. If the gate cannot read CODEOWNERS or
 #    the changed-file list, it holds the pull request (fails closed).
+#    The one exception is a configured automation lane
+#    (.github/automation-lanes.json on main, see docs/automation-lanes.md):
+#    a pull request from the named automation account, on a feed/ branch
+#    inside this repository, that changes only allowed files under data/.
+#    [RED] pull requests, .github/ and CODEOWNERS are never in a lane.
 # 2. Turns on auto-merge (squash) for pull requests from branches inside
 #    this repository. Pull requests from forks are never auto-merged.
 # 3. Waits until every other check on the pull request has finished and
@@ -68,6 +73,9 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          FEEDS_PAUSED: ${{ vars.FEEDS_PAUSED }}
         run: |
           # Any error in this step fails the step, which holds the pull request.
           set -euo pipefail
@@ -90,9 +98,81 @@ jobs:
             exit 1
           fi
 
-          python3 - "$RUNNER_TEMP/CODEOWNERS" "$RUNNER_TEMP/files.txt" <<'PY'
+          # 3. Automation lanes (see docs/automation-lanes.md). The lane file is
+          #    read from main, never from the pull request. If it is missing or
+          #    unreadable, no lane applies and the owner rules stand.
+          gh api -H "Accept: application/vnd.github.raw" \
+            "repos/$REPO/contents/.github/automation-lanes.json?ref=$BASE_REF" \
+            > "$RUNNER_TEMP/lanes.json" 2>/dev/null || echo '{"enabled": false}' > "$RUNNER_TEMP/lanes.json"
+          gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate \
+            --jq '.[] | {filename, previous_filename, status, additions, deletions}' > "$RUNNER_TEMP/files.jsonl"
+
+          python3 - "$RUNNER_TEMP/CODEOWNERS" "$RUNNER_TEMP/files.txt" "$RUNNER_TEMP/lanes.json" "$RUNNER_TEMP/files.jsonl" <<'PY'
+          import json
+          import os
           import re
           import sys
+
+          def lane_exempt(lanes_path, files_path):
+              """True only when every changed file sits inside one configured
+              automation lane and the author, branch and size limits all match.
+              Any doubt or error returns False, so the owner rules apply."""
+              try:
+                  if os.environ.get("FEEDS_PAUSED", "").strip().lower() in ("1", "true", "yes"):
+                      print("Automation lanes are paused (FEEDS_PAUSED); owner rules apply.")
+                      return False
+                  if os.environ.get("SAME_REPO") != "true":
+                      return False
+                  with open(lanes_path, encoding="utf-8") as fh:
+                      cfg = json.load(fh)
+                  if cfg.get("enabled") is not True:
+                      return False
+                  author = os.environ.get("PR_AUTHOR", "").strip().lower()
+                  head_ref = os.environ.get("HEAD_REF", "")
+                  entries = []
+                  with open(files_path, encoding="utf-8") as fh:
+                      for line in fh:
+                          if line.strip():
+                              entries.append(json.loads(line))
+                  if not entries:
+                      return False
+                  for lane in cfg.get("lanes", []):
+                      authors = [a.strip().lower() for a in (lane.get("authors") or []) if a.strip()]
+                      prefix = lane.get("branch_prefix") or ""
+                      paths = lane.get("paths") or []
+                      exts = [e.lower() for e in (lane.get("extensions") or [])]
+                      # A lane must name an author, a branch prefix, data/ folders and file types.
+                      if not authors or not prefix or not paths or not exts:
+                          continue
+                      # Hard limit: a lane can only ever cover folders under data/.
+                      if any((not p.startswith("data/")) or (not p.endswith("/")) or ".." in p for p in paths):
+                          continue
+                      if author not in authors or not head_ref.startswith(prefix):
+                          continue
+                      max_files = int(lane.get("max_files", 0))
+                      max_lines = int(lane.get("max_changed_lines", 0))
+                      if max_files < 1 or max_lines < 1 or len(entries) > max_files:
+                          continue
+                      lines = 0
+                      ok = True
+                      for e in entries:
+                          name = e.get("filename") or ""
+                          if e.get("previous_filename"):
+                              ok = False
+                          if e.get("status") not in ("added", "modified"):
+                              ok = False
+                          if ".." in name.split("/") or not any(name.startswith(p) for p in paths):
+                              ok = False
+                          if not any(name.lower().endswith(x) for x in exts):
+                              ok = False
+                          lines += int(e.get("additions", 0)) + int(e.get("deletions", 0))
+                      if ok and lines <= max_lines:
+                          print(f"Automation lane '{lane.get('name', '?')}' matched {len(entries)} file(s), {lines} changed line(s): owner-only hold not applied. Required checks still apply.")
+                          return True
+                  return False
+              except Exception as exc:  # fail closed
+                  print(f"Automation lane check failed ({exc}); owner rules apply.")
+                  return False
 
           def to_regex(pattern):
               anchored = pattern.startswith("/") or "/" in pattern.rstrip("/")
@@ -131,8 +211,10 @@ jobs:
           if not files:
               print("::error::Could not read the list of changed files, so this pull request is held for the owner.")
               sys.exit(1)
+          if lane_exempt(sys.argv[3], sys.argv[4]):
+              sys.exit(0)
           always = re.compile(r"^\.github/|(^|/)CODEOWNERS$")
-          hits = sorted({f for f in files if always.search(f) or any(r.match(f) for r in rules)})
+          hits =sorted({f for f in files if always.search(f) or any(r.match(f) for r in rules)})
           if hits:
               print("::error::This pull request changes owner-only files and needs the owner to merge it:")
               print("\n".join(hits))
