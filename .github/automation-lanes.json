@@ -1,0 +1,15 @@
+{
+  "description": "Automation lanes for the merge gate (docs/automation-lanes.md). A pull request is exempt from the owner-only hold only if it matches a lane exactly. The lane is inert until an author is named. Lanes can only cover folders under data/. Pause every lane at once by setting the repository variable FEEDS_PAUSED to true.",
+  "enabled": true,
+  "lanes": [
+    {
+      "name": "registry-weekly-export",
+      "authors": [],
+      "branch_prefix": "feed/",
+      "paths": ["data/registry/"],
+      "extensions": [".yaml"],
+      "max_files": 5,
+      "max_changed_lines": 5000
+    }
+  ]
+}
