@@ -4,7 +4,7 @@
   "lanes": [
     {
       "name": "registry-weekly-export",
-      "authors": [],
+      "authors": ["claude[bot]"],
       "branch_prefix": "feed/",
       "paths": ["data/registry/"],
       "extensions": [".yaml"],
