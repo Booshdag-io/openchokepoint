@@ -1,0 +1,56 @@
+# Handling: Unclassified — working
+#
+# Owner approval. When the `owner-approved` label is added to a pull request,
+# this checks that the person who added it is TLS-sys (login AND numeric
+# account id) with admin permission on this repository (REST collaborator
+# permission API), and that the label was added on the pull request's latest
+# commit. If so it turns on squash auto-merge, sets `owner-approval` to
+# success for that exact commit, and records the approval in the summary
+# comment. Anyone else's label is removed and the approval refused.
+#
+# Removing the label withdraws the approval (owner-approval back to pending,
+# auto-merge off). New commits clear it too (see red-zone.yml).
+#
+# Runs on pull_request_target from the base branch; checks out the base
+# branch only. No pull request code is checked out or run.
+name: Owner approval
+
+on:
+  pull_request_target:
+    types: [labeled, unlabeled]
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  approval:
+    name: Owner approval
+    if: github.event.label.name == 'owner-approved'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: owner-approval-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: write       # only to turn squash auto-merge on or off
+      pull-requests: write  # removing a refused label, the summary comment
+      statuses: write       # the owner-approval commit status
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Approve or withdraw
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+          SENDER_ID: ${{ github.event.sender.id }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          COMMAND: ${{ github.event.action == 'labeled' && 'approve' || 'revoke' }}
+          FEEDS_PAUSED: ${{ vars.FEEDS_PAUSED }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 .github/scripts/red_zone_gate.py "$COMMAND"
