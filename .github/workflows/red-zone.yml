@@ -1,0 +1,58 @@
+# Handling: Unclassified — working
+#
+# Red zone gate. Classifies every pull request into main against
+# .github/CODEOWNERS on the base branch and reports the `owner-approval`
+# commit status that the ruleset on main requires:
+#   green -> success; red -> pending until the owner approves (see
+#   owner-approval.yml). Red never fails this job; only real errors do.
+# It also sets the zone:red / zone:green label and keeps one summary comment
+# up to date. On every push (synchronize) it removes `owner-approved`, so an
+# approval only ever covers the commit the owner looked at.
+#
+# Runs on pull_request_target so the workflow, script and CODEOWNERS always come
+# from the base branch; a pull request cannot edit its own gate. It checks out
+# the base branch only and reads the changed-file list from the REST API. No
+# pull request code is checked out or run. Title and body are read from the
+# API inside the script, never pasted into a shell.
+name: Red zone
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  gate:
+    name: Red zone gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Shared with owner-approval.yml so the gate and an approval never race on
+    # the same pull request's status.
+    concurrency:
+      group: owner-approval-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: write       # only to turn off auto-merge on an unapproved red pull request
+      pull-requests: write  # zone labels, the summary comment, removing owner-approved
+      statuses: write       # the owner-approval commit status
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Unit-test the gate
+        run: python3 -m unittest discover -s .github/scripts/tests -p 'test_red_zone_gate.py' -v
+
+      - name: Classify and report owner-approval
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EVENT_ACTION: ${{ github.event.action }}
+          FEEDS_PAUSED: ${{ vars.FEEDS_PAUSED }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 .github/scripts/red_zone_gate.py gate

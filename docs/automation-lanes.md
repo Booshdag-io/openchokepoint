@@ -4,7 +4,7 @@ Handling: Unclassified — public
 
 An automation lane lets a scheduled feed update one folder of public registry data without a human merge. It does not remove any check. The pull request still has to pass the data-handling guard and the schema validator, and the `merge-gate` check still waits for every other check.
 
-## A pull request is exempt from the owner-only hold only if all of these are true
+## A pull request is green (no owner approval needed) only if all of these are true
 
 1. It is not marked `[RED]`.
 2. It comes from a branch inside this repository (never a fork) whose name starts with the lane's `branch_prefix` (`feed/`).

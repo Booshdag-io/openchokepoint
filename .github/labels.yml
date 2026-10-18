@@ -1,3 +1,4 @@
+# Handling: Unclassified — public
 - { name: bounty,           color: "a2dc27", description: "Bounty-eligible once assigned; see BOUNTIES.md" }
 - { name: "bounty:starter", color: "997acf", description: "Tier: documentation, tests, data-quality fixes. Nominal C$100 (BOUNTIES.md)" }
 - { name: "bounty:standard", color: "a1c962", description: "Tier: connector, parser, schema extension. Nominal C$500 (BOUNTIES.md)" }
@@ -9,3 +10,6 @@
 - { name: tooling,          color: "5319e7", description: "Validator, converters, CI" }
 - { name: examples,         color: "fbca04", description: "Synthetic examples and docs" }
 - { name: bug,              color: "d73a4a", description: "Something is not working" }
+- { name: "zone:red",       color: "b60205", description: "Changes a red-zone path; waits for the owner's approval (set by the Red zone gate)" }
+- { name: "zone:green",     color: "0e8a16", description: "Changes green-zone paths only (set by the Red zone gate)" }
+- { name: owner-approved,   color: "0e8a16", description: "Owner approved the latest commit of this red PR; only TLS-sys may add it" }
