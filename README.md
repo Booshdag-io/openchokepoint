@@ -1,6 +1,6 @@
 Handling: Unclassified — public
 
-# OpenChokepoint (working name)
+# OpenChokepoint 
 
 An open grammar for mapping supply-chain dependencies: who supplies what, from where, under whose jurisdiction, and on what evidence. It gives analysts, researchers and industry one shared way to record chokepoints so registries can be compared, validated and combined.
 
