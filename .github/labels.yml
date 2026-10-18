@@ -1,3 +1,4 @@
+# Handling: Unclassified — public
 - { name: bounty,           color: "a2dc27", description: "Bounty-eligible once assigned; see BOUNTIES.md" }
 - { name: "bounty:starter", color: "997acf", description: "Tier: documentation, tests, data-quality fixes. Nominal C$100 (BOUNTIES.md)" }
 - { name: "bounty:standard", color: "a1c962", description: "Tier: connector, parser, schema extension. Nominal C$500 (BOUNTIES.md)" }
