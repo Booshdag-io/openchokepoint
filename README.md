@@ -44,3 +44,4 @@ Code under Apache-2.0; documentation and data under the Open Government Licence 
 
 ---
 Element Ventures (Canada) Ltd. · © 2026 T. Leroy Smith. Exclusively licensed to Element Ventures (Canada) Ltd.
+
