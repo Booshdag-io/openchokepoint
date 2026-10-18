@@ -109,11 +109,9 @@ def parse_codeowners(text: str) -> list[tuple[re.Pattern[str], bool]]:
 
 
 def is_red(path: str, rules: list[tuple[re.Pattern[str], bool]]) -> bool:
-    verdict = False  # only paths CODEOWNERS gives an owner are red
-    for regex, has_owner in rules:
-        if regex.match(path):
-            verdict = has_owner  # last match wins
-    return verdict
+    # Red if any line that names an owner matches; lines without an owner are
+    # ignored, exactly as the previous merge-gate did.
+    return any(has_owner and regex.match(path) for regex, has_owner in rules)
 
 
 def red_paths(paths: list[str], rules: list[tuple[re.Pattern[str], bool]]) -> list[str]:

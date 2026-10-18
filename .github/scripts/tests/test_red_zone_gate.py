@@ -52,6 +52,11 @@ class Zones(unittest.TestCase):
         self.assertFalse(is_red("x.md", rules))
         self.assertTrue(is_red("y.md", rules))
 
+    def test_line_without_owner_never_turns_an_owner_path_green(self):
+        rules = parse_codeowners("/HANDLING.md @TLS-sys\n*.md\n")
+        self.assertTrue(is_red("HANDLING.md", rules))
+        self.assertFalse(is_red("docs/a.md", rules))
+
     def test_anchored_patterns_do_not_match_elsewhere(self):
         self.assertZone("docs/README.md", False)
         self.assertZone("dataX/file.yaml", False)
@@ -299,6 +304,12 @@ class Gate(unittest.TestCase):
     def test_empty_file_list_is_an_error(self):
         with self.assertRaises(g.ApiError):
             gate(FakeGitHub([]))
+
+    def test_body_marked_red_is_red(self):
+        gh = FakeGitHub(["docs/a.md"])
+        gh.pr["body"] = "Part of [RED] work"
+        gate(gh)
+        self.assertEqual(gh.latest()["state"], "pending")
 
     def test_title_marked_red_is_red(self):
         gh = FakeGitHub(["docs/a.md"], title="[RED] tweak")
