@@ -1,0 +1,18 @@
+handling: "Unclassified — public"
+contribution: "Rocket Lab Archimedes Engine Turbopump Digital Thread Trace"
+type: dataset
+sources:
+  - description: "Rocket Lab USA, Inc. Form 10-K Annual Report (Item 1 & Item 2)"
+    url: "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    licence: "U.S. Securities and Exchange Commission Public Filing / EDGAR Public Domain"
+    retrieved: "2026-10-19"
+  - description: "Rocket Lab Official Press Release: Completes Archimedes Engine Build"
+    url: "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    licence: "Rocket Lab USA Public Release"
+    retrieved: "2026-10-19"
+synthetic: false
+personal_information: none
+export_controlled: false
+training_rights_confirmed: true
+base_model: ""
+notes: "Public digital thread trace of 3D-printed turbopump housings and engine qualification test campaign for the Rocket Lab Archimedes engine (Neutron launch vehicle) under active development within 24 months. Contains pointers to public disclosures only."

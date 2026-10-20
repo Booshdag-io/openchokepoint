@@ -1,0 +1,262 @@
+# Handling: Unclassified — public
+# Digital thread trace for the Rocket Lab Archimedes Liquid Rocket Engine (Neutron Launch Vehicle) Turbopump Housing.
+# Sources: Rocket Lab Form 10-K (Item 1 & Item 2) and Rocket Lab Official Press Release (May 6, 2024).
+# Pointers to public disclosures only; no dimensions, CAD geometry, alloy compositions, or test results.
+# Rule DT-003: real process steps recorded without temporal sequence ordering in the public tier.
+# Visibility gap demonstrated: step stp-arch-003 (inspection) has no EvidenceRecord.
+
+objects:
+  # ---- organizations and facilities ----
+  - type: Entity
+    id: ent-rocket-lab-usa
+    name: "Rocket Lab USA, Inc."
+    entity_kind: company
+    incorporation_jurisdiction: US-DE
+    controlling_jurisdiction: US
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: Facility
+    id: fac-rocket-lab-long-beach
+    name: "Rocket Lab Long Beach Engine Production Complex"
+    facility_kind: manufacturing
+    host_jurisdiction: US-CA
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: Facility
+    id: fac-nasa-stennis
+    name: "NASA Stennis Space Center"
+    facility_kind: test
+    host_jurisdiction: US-MS
+    evidence_grade: confirmed
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: false
+
+  # ---- design and physical serial instance (synthetic: true per maintainer review: part/serial not in public disclosures) ----
+  - type: Component
+    id: cmp-archimedes-turbopump-housing
+    name: "Archimedes 3D-Printed Turbopump Housing"
+    part_number: "ARCH-TP-HOUSING"
+    revision: "DEV"
+    component_kind: housing
+    evidence_grade: confirmed
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: true
+
+  - type: SerialItem
+    id: ser-archimedes-tp-dev01
+    name: "Archimedes Development Engine Turbopump Housing"
+    serial: "ARCH-TP-DEV-01"
+    evidence_grade: reported
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: true
+
+  # ---- process steps (matching source: additive manufacturing & machining from 10-K, generic inspection graded reported) ----
+  - type: ProcessStep
+    id: stp-arch-001
+    name: "Turbopump housing additive manufacturing"
+    step_kind: build
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: ProcessStep
+    id: stp-arch-002
+    name: "Turbopump housing machining"
+    step_kind: machining
+    evidence_grade: reported
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: ProcessStep
+    id: stp-arch-003
+    name: "Turbopump housing inspection"
+    step_kind: inspection
+    evidence_grade: reported
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: false
+
+  # ---- evidence records (public citations only, pointers without inline content) ----
+  - type: EvidenceRecord
+    id: evd-arch-001
+    name: "SEC Form 10-K FY2025 Item 1 Manufacturing Process Disclosure"
+    record_kind: other
+    issuer: "Rocket Lab USA, Inc."
+    issued_on: 2026-02-26
+    citation: "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    citation_section: "Item 1. Business - Manufacturing"
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: EvidenceRecord
+    id: evd-arch-002
+    name: "Rocket Lab Archimedes Engine Build & 3D Printed Turbopump Disclosure"
+    record_kind: build_record
+    issuer: "Rocket Lab USA, Inc."
+    issued_on: 2024-05-06
+    citation: "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    citation_section: "Press Release - First Full Assembly & Test Campaign"
+    evidence_grade: confirmed
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: false
+
+links:
+  # ---- organization & facility ----
+  - type: located_at
+    id: lnk-arch-001
+    from: ent-rocket-lab-usa
+    to: fac-rocket-lab-long-beach
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: located_at
+    id: lnk-arch-002
+    from: ent-rocket-lab-usa
+    to: fac-nasa-stennis
+    evidence_grade: confirmed
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: false
+
+  # ---- serial to design ----
+  - type: instance_of
+    id: lnk-arch-003
+    from: ser-archimedes-tp-dev01
+    to: cmp-archimedes-turbopump-housing
+    evidence_grade: confirmed
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: true
+
+  # ---- serial underwent process steps (NO sequence in public tier - rule DT-003) ----
+  - type: underwent
+    id: lnk-arch-004
+    from: ser-archimedes-tp-dev01
+    to: stp-arch-001
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: underwent
+    id: lnk-arch-005
+    from: ser-archimedes-tp-dev01
+    to: stp-arch-002
+    evidence_grade: reported
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: underwent
+    id: lnk-arch-006
+    from: ser-archimedes-tp-dev01
+    to: stp-arch-003
+    evidence_grade: reported
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: false
+
+  # ---- process steps evidenced by public records (stp-arch-003 has no evidence link: expected gap) ----
+  - type: evidenced_by
+    id: lnk-arch-007
+    from: stp-arch-001
+    to: evd-arch-001
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: evidenced_by
+    id: lnk-arch-008
+    from: stp-arch-002
+    to: evd-arch-001
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: evidenced_by
+    id: lnk-arch-011
+    from: stp-arch-001
+    to: evd-arch-002
+    evidence_grade: confirmed
+    sources:
+      - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
+    as_of: 2024-05-06
+    lifecycle: active
+    synthetic: false
+
+  # ---- process steps performed at facility ----
+  - type: performed_at
+    id: lnk-arch-009
+    from: stp-arch-001
+    to: fac-rocket-lab-long-beach
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
+
+  - type: performed_at
+    id: lnk-arch-010
+    from: stp-arch-002
+    to: fac-rocket-lab-long-beach
+    evidence_grade: confirmed
+    sources:
+      - "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000013/rklb-20251231.htm"
+    as_of: 2026-02-26
+    lifecycle: active
+    synthetic: false
