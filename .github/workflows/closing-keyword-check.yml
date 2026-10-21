@@ -1,0 +1,37 @@
+# Handling: Unclassified — public
+#
+# Closing-keyword check (rule CK-001). Fails a pull request whose title,
+# description or commit messages would close a standing issue on merge
+# ("Closes #3" and the other GitHub closing keywords). Standing issues are open
+# calls, [Programme] issues and anything labelled keep-open. Contributors write
+# "Refs #N" instead. See .github/scripts/closing_keyword_check.py.
+#
+# Runs on pull_request with a read-only token and no secrets. Title and body
+# are read from the event file inside Python, never pasted into a shell.
+# Re-runs when the title or description is edited, so a fix clears it.
+name: Closing keywords
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  closing-keyword-check:
+    name: Closing-keyword check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check tests (offline)
+        run: python3 -m unittest discover -s .github/scripts/tests -p 'test_closing_keyword_check.py' -v
+      - name: Check title, description and commit messages
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/closing_keyword_check.py

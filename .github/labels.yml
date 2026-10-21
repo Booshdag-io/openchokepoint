@@ -12,4 +12,5 @@
 - { name: bug,              color: "d73a4a", description: "Something is not working" }
 - { name: "zone:red",       color: "b60205", description: "Changes a red-zone path; waits for the owner's approval (set by the Red zone gate)" }
 - { name: "zone:green",     color: "0e8a16", description: "Changes green-zone paths only (set by the Red zone gate)" }
+- { name: keep-open,        color: "c5def5", description: "Standing issue; a pull request may not close it (closing-keyword check CK-001)" }
 - { name: owner-approved,   color: "0e8a16", description: "Owner approved the latest commit of this red PR; only TLS-sys may add it" }
