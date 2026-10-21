@@ -29,3 +29,7 @@ jobs:
           path-to-document: https://github.com/${{ github.repository }}/blob/main/CLA.md
           branch: cla-signatures
           allowlist: TLS-sys,dependabot[bot],github-actions[bot]
+          # Do not lock pull requests on close. A locked PR that is reopened blocks the
+          # contributor from commenting and stops the Red zone gate updating its status
+          # comment (HTTP 403). Signatures live on the cla-signatures branch, not in the lock.
+          lock-pullrequest-aftermerge: false
