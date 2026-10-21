@@ -29,3 +29,5 @@ jobs:
           path-to-document: https://github.com/${{ github.repository }}/blob/main/CLA.md
           branch: cla-signatures
           allowlist: TLS-sys,dependabot[bot],github-actions[bot]
+          lock-pullrequest-aftermerge: false
+          
