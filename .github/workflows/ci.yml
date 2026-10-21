@@ -26,6 +26,32 @@ jobs:
           fi
       - run: python3 .github/scripts/data_handling_guard.py changed_files.txt
 
+  identifier-source-check:
+    name: Identifier source check
+    # Rule ID-001: a part, serial or lot number on a real record must appear in a cited source.
+    # Runs on pull_request (not pull_request_target): no secrets, read-only token, contributor
+    # data is only parsed as YAML and its URLs fetched as text. Never executes contributor code.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SOURCE_CHECK_CONTACT: ${{ vars.SOURCE_CHECK_CONTACT }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - run: pip install pyyaml
+      - name: Check tests (offline)
+        run: python3 -m unittest discover -s .github/scripts/tests -p 'test_identifier_source_check.py' -v
+      - name: Check identifiers in changed data files
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --name-only --diff-filter=ACM "origin/${{ github.base_ref }}"...HEAD -- 'data/' > changed_data.txt
+          else
+            git diff --name-only --diff-filter=ACM HEAD~1 HEAD -- 'data/' > changed_data.txt || touch changed_data.txt
+          fi
+          grep -E '\.ya?ml$' changed_data.txt > data_files.txt || true
+          xargs -r -d '\n' python3 .github/scripts/identifier_source_check.py < data_files.txt
+
   validate:
     name: Schema validation
     runs-on: ubuntu-24.04
