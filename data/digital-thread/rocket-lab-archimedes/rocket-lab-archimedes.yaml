@@ -51,7 +51,7 @@ objects:
     part_number: "ARCH-TP-HOUSING"
     revision: "DEV"
     component_kind: housing
-    evidence_grade: confirmed
+    evidence_grade: reported  # part number is a placeholder (synthetic); only the housing's existence is reported
     sources:
       - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
     as_of: 2024-05-06
@@ -121,13 +121,13 @@ objects:
 
   - type: EvidenceRecord
     id: evd-arch-002
-    name: "Rocket Lab Archimedes Engine Build & 3D Printed Turbopump Disclosure"
-    record_kind: build_record
+    name: "Rocket Lab press release: Archimedes engine build and test campaign"
+    record_kind: other  # a press release, not the build record itself
     issuer: "Rocket Lab USA, Inc."
     issued_on: 2024-05-06
     citation: "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
     citation_section: "Press Release - First Full Assembly & Test Campaign"
-    evidence_grade: confirmed
+    evidence_grade: reported
     sources:
       - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
     as_of: 2024-05-06
@@ -163,7 +163,7 @@ links:
     id: lnk-arch-003
     from: ser-archimedes-tp-dev01
     to: cmp-archimedes-turbopump-housing
-    evidence_grade: confirmed
+    evidence_grade: reported
     sources:
       - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
     as_of: 2024-05-06
@@ -231,7 +231,7 @@ links:
     id: lnk-arch-011
     from: stp-arch-001
     to: evd-arch-002
-    evidence_grade: confirmed
+    evidence_grade: reported
     sources:
       - "https://www.rocketlabusa.com/updates/rocket-lab-completes-archimedes-engine-build-begins-engine-test-campaign/"
     as_of: 2024-05-06
