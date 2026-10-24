@@ -12,10 +12,10 @@ payment before a Funding Event.
 | Item | Amount (CAD) |
 | :-- | :-- |
 | Pool ceiling | 30,000 |
-| Accrued and unpaid | 0 |
+| Accrued and unpaid | 1,500 |
 | Paid | 0 |
 | Lapsed | 0 |
-| Headroom under ceiling | 30,000 |
+| Headroom under ceiling | 28,500 |
 
 ## Funding Events
 
@@ -29,6 +29,6 @@ Recorded within 30 days of each event (BOUNTIES.md section 4).
 
 | Entry | Issue | Contributor | Tier | Nominal value | Accepted | Status | Paid on | Notes |
 | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
-| | | | | | | | | |
+| L-0001 | #3 | @PINYOPATTANAWASANPORN (Responsible Person) | `bounty:major` | 1,500 | 2026-10-20 (#33) | Accrued | | Rocket Lab Archimedes digital-thread trace. Accepted under the terms in force on 20 October 2026. Recorded late: BOUNTIES.md asks for the entry in the merging pull request. |
 
 Status values: **Accrued**, **Paid**, **Lapsed**.
