@@ -9,7 +9,7 @@ Refs #
 
 ## Checklist
 
-- [ ] Records are synthetic only; no real organizations, people, figures or confidential material
+- [ ] Records are synthetic, or real mapping records from public sources under `data/` with a `provenance.yaml` (see DATA-CONTRIBUTIONS.md and EXPORT-CONTROL.md); no people, no confidential material, no technical data on design, manufacture, test or performance
 - [ ] Every new or changed file carries a `Handling:` marking
 - [ ] `python3 tools/validate.py` passes locally
 

@@ -4,7 +4,7 @@ Handling: Unclassified — public
 
 An open grammar for mapping supply-chain dependencies: who supplies what, from where, under whose jurisdiction, and on what evidence. It gives analysts, researchers and industry one shared way to record chokepoints so registries can be compared, validated and combined.
 
-> **Status:** private preview. The project name is a placeholder pending a name-availability check.
+> **Status:** public preview, release [`v0.2.1-preview`](https://github.com/Element-Ventures-Canada-Ltd/openchokepoint/releases/tag/v0.2.1-preview) (9 Oct 2026). The schema and validator are drafts and may change before 1.0. Real-record mapping contributions are open under the published rules below. The project name is a placeholder pending a name-availability check.
 
 ## What is here
 
@@ -12,6 +12,8 @@ An open grammar for mapping supply-chain dependencies: who supplies what, from w
 |---|---|
 | `schema/openchokepoint.yaml` | Object and link types (v0.2.1-draft): Entity, Facility, Capability, Programme; and the digital thread: Component, SerialItem, MaterialLot, ProcessStep, EvidenceRecord, CriticalItem |
 | `tools/validate.py` | Validator for instance files |
+| `data/registry/` | Real-world mapping records from public sources (organization-level facts only, no scores or assessments), with a `provenance.yaml` |
+| `data/digital-thread/` | Real-world digital-thread traces from public sources, each with a `provenance.yaml` |
 | `examples/synthetic-example.yaml` | A fully fictional worked example (space turbopump supply chain) |
 | `examples/synthetic-turbopump-thread.yaml` | A fully fictional digital thread: one rotor traced from material lot to assembly, plus three critical items |
 | `docs/digital-thread.md` | The digital thread in plain language |
@@ -22,7 +24,7 @@ An open grammar for mapping supply-chain dependencies: who supplies what, from w
 
 ```bash
 pip install pyyaml
-python3 tools/validate.py examples/*.yaml
+python3 tools/validate.py examples/*.yaml data/registry/*.yaml
 python3 apps/chokepoint-explorer/explore.py examples/synthetic-turbopump-thread.yaml
 python3 -m unittest discover -s tests
 ```
@@ -32,7 +34,7 @@ python3 -m unittest discover -s tests
 - **Jurisdiction of control, not residency.** Every entity records where it is incorporated and who controls it.
 - **Evidence on every record.** Each object and link carries an evidence grade, sources and an as-of date.
 - **Announced is not operational.** Lifecycle keeps the two apart.
-- **Synthetic only, for now.** External data contributions open after review; until then the validator rejects any non-synthetic record.
+- **Real records under published rules; everything else synthetic.** Real-record contributions are mapping data only (suppliers, dependencies, chokepoints) from public sources. They live under `data/` with a `provenance.yaml` and are accepted after an export-control screen and maintainer review: see [DATA-CONTRIBUTIONS.md](DATA-CONTRIBUTIONS.md) and [EXPORT-CONTROL.md](EXPORT-CONTROL.md). The validator rejects any real record outside `data/`, and critical-item judgments are always synthetic. No technical data on design, manufacture, test or performance.
 
 ## Contributing
 
