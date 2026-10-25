@@ -1,0 +1,67 @@
+# Handling: Unclassified — public
+# Adversarial test set for Slice C (Issue #18)
+# All values are completely invented and fictional.
+
+objects:
+  # Case 1: Smuggled temperature and pressure in EvidenceRecord citation_section
+  - type: EvidenceRecord
+    id: ev-attack-001
+    record_kind: inspection_report
+    issuer: "Fictional Inspection Lab"
+    issued_on: 2026-10-01
+    citation: "https://example.org/synthetic/report-001"
+    citation_section: "Section 3: HIP cycle reached 1200 deg C at 150 MPa"
+    evidence_grade: confirmed
+    sources: ["https://example.org/synthetic/report-001"]
+    as_of: 2026-10-01
+    lifecycle: active
+    synthetic: true
+
+  # Case 2: Smuggled tolerance in Component part_number
+  - type: Component
+    id: comp-attack-002
+    part_number: "ROTOR-X99-TOLERANCE-0.05mm"
+    revision: "A"
+    component_kind: rotor
+    evidence_grade: confirmed
+    sources: ["https://example.org/synthetic/comp-002"]
+    as_of: 2026-10-01
+    lifecycle: active
+    synthetic: true
+
+  # Case 3: Smuggled RPM parameter in ProcessStep name
+  - type: ProcessStep
+    id: step-attack-003
+    name: "High-speed balancing spin at 45000 RPM"
+    step_kind: balancing
+    evidence_grade: confirmed
+    sources: ["https://example.org/synthetic/step-003"]
+    as_of: 2026-10-01
+    lifecycle: active
+    synthetic: true
+
+  # Case 4: Smuggled dimensional tolerance in MaterialLot lot_number
+  - type: MaterialLot
+    id: lot-attack-004
+    lot_number: "LOT-BILLET-DIA-150mm"
+    material_class: billet
+    evidence_grade: confirmed
+    sources: ["https://example.org/synthetic/lot-004"]
+    as_of: 2026-10-01
+    lifecycle: active
+    synthetic: true
+
+  # Case 5: Smuggled engineering clearance in Entity name
+  - type: Entity
+    id: ent-attack-005
+    name: "Precision Machining Corp (Clearance 15 microns)"
+    entity_kind: company
+    incorporation_jurisdiction: CA
+    controlling_jurisdiction: CA
+    evidence_grade: confirmed
+    sources: ["https://example.org/synthetic/ent-005"]
+    as_of: 2026-10-01
+    lifecycle: active
+    synthetic: true
+
+links: []
