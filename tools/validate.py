@@ -110,6 +110,15 @@ def check_public_data(path, records):
 
 THREAD_TYPES = {"Component", "SerialItem", "MaterialLot", "ProcessStep", "EvidenceRecord"}
 SHA256 = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+# Red-team rules (Slice C - RT series): prevent smuggling of controlled technical data
+# (temperatures, pressures, tolerances, dimensions, engineering units)
+TECHNICAL_DATA_RE = re.compile(
+    r"(?i)\d+(?:\.\d+)?\s*(?:deg\s*[cf]|kpa|mpa|psi|bar|rpm|hrc|m/s|mm|cm|microns?|in(?:ches)?|ft|lbs?|kg|hz|khz|ghz|v|mv|kv|ma|kw|mw)|"
+    r"(?i)(?:tolerance|clearance)\s*[:=]?\s*[+-]?\d+(?:\.\d+)?|"
+    r"(?i)\d+(?:\.\d+)?\s*[±\+/-]\s*\d+(?:\.\d+)?"
+)
+
 INLINE_CONTENT = {"content", "body", "text", "data", "attachment", "payload", "excerpt", "value", "values",
                   "result", "results", "measurements", "parameters", "notes"}
 EVIDENCE_STRING_MAX = 120   # pointers are short; anything longer looks like content (EV-002)
@@ -123,6 +132,22 @@ def check_thread(objects, links, tier="public"):
     """Digital-thread and critical-item rules (schema v0.2). Fail closed; every error names the rule and the record."""
     errs = []
     by_id = {r.get("id"): r for r in objects + links}
+
+
+    # RT-001: Technical data and engineering measurement smuggling check across all fields
+    for o in objects + links:
+        rid = o.get("id", "unknown")
+        for k, v in o.items():
+            if isinstance(v, str):
+                m = TECHNICAL_DATA_RE.search(v)
+                if m:
+                    errs.append(f"RT-001 {rid}: property '{k}' contains prohibited technical/engineering data ('{m.group(0)}')")
+            elif isinstance(v, list):
+                for idx, item in enumerate(v):
+                    if isinstance(item, str):
+                        m = TECHNICAL_DATA_RE.search(item)
+                        if m:
+                            errs.append(f"RT-001 {rid}: property '{k}[{idx}]' contains prohibited technical/engineering data ('{m.group(0)}')")
 
     # EvidenceRecord: pointer only.
     for o in objects:
